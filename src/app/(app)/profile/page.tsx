@@ -1,10 +1,15 @@
+import { getWorkspace } from "@/lib/app-data"
 import { contributionTimeline, userProfile } from "@/lib/mock-data"
+import { getAuthSession } from "@/lib/session"
 import { PageTransition } from "@/components/app/page-transition"
 import { ReputationBadge } from "@/components/reputation-badge"
 import { StatsCard } from "@/components/stats-card"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const session = await getAuthSession()
+  const workspace = await getWorkspace(session?.user?.id)
+
   return (
     <PageTransition>
       <section>
@@ -18,24 +23,26 @@ export default function ProfilePage() {
       <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
         <Card className="rounded-3xl border border-border/70 bg-card/95 shadow-sm">
           <CardHeader>
-            <CardTitle>{userProfile.username}</CardTitle>
+            <CardTitle>{workspace?.username ?? userProfile.username}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Wallet Address</p>
-              <p className="mt-2 font-mono text-sm">{userProfile.wallet}</p>
+              <p className="mt-2 font-mono text-sm">
+                {workspace?.wallet ?? "Primary wallet not linked"}
+              </p>
             </div>
-            <ReputationBadge score={userProfile.reputation} />
+            <ReputationBadge score={workspace?.reputation ?? userProfile.reputation} />
             <div className="grid gap-4 sm:grid-cols-2">
               <StatsCard
                 label="Total Earnings"
-                value={`$${userProfile.totalEarnings.toLocaleString()}`}
+                value={`$${(workspace?.totalEarnings ?? userProfile.totalEarnings).toLocaleString()}`}
                 detail="Across completed and active pools"
               />
               <StatsCard
                 label="Pools Joined"
-                value={`${userProfile.poolsJoined}`}
-                detail="Including one active bidding pool"
+                value={`${workspace?.poolsJoined ?? userProfile.poolsJoined}`}
+                detail={`OAuth provider: ${workspace?.oauthProvider ?? "seed"}`}
               />
             </div>
           </CardContent>

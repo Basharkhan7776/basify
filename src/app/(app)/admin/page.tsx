@@ -1,4 +1,5 @@
-import { adminStats, chartBars, recentPools, recentUsers, revenuePoints } from "@/lib/mock-data"
+import { chartBars, revenuePoints } from "@/lib/mock-data"
+import { getAdminSnapshot } from "@/lib/app-data"
 import { PageTransition } from "@/components/app/page-transition"
 import { StatsCard } from "@/components/stats-card"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const admin = await getAdminSnapshot()
   const revenuePath = revenuePoints
     .map((point, index) => `${index === 0 ? "M" : "L"} ${index * 48} ${90 - point}`)
     .join(" ")
@@ -27,7 +29,7 @@ export default function AdminPage() {
         </h1>
       </section>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {adminStats.map((stat) => (
+        {admin.stats.map((stat) => (
           <StatsCard
             key={stat.label}
             label={stat.label}
@@ -88,10 +90,10 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentPools.map((pool) => (
+                {admin.recentPools.map((pool) => (
                   <TableRow key={pool.name}>
                     <TableCell className="font-medium">{pool.name}</TableCell>
-                    <TableCell>{pool.manager}</TableCell>
+                    <TableCell>{pool.round}</TableCell>
                     <TableCell>{pool.members}</TableCell>
                     <TableCell>{pool.status}</TableCell>
                   </TableRow>
@@ -114,13 +116,13 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentUsers.map((user) => (
-                  <TableRow key={user.wallet}>
+                {admin.recentUsers.map((user) => (
+                  <TableRow key={`${user.email}-${user.name}`}>
                     <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell className="font-mono text-muted-foreground">
-                      {user.wallet}
+                      {user.email}
                     </TableCell>
-                    <TableCell>{user.joined}</TableCell>
+                    <TableCell>{new Date(user.joined).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

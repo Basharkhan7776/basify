@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { IBM_Plex_Mono, Manrope } from "next/font/google"
 
+import { AppProviders } from "@/components/providers/app-providers"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 
 import "./globals.css"
@@ -40,7 +41,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AppProviders>{children}</AppProviders>
         </ThemeProvider>
       </body>
     </html>

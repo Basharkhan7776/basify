@@ -1,13 +1,10 @@
 import { notFound } from "next/navigation"
 
-import { getPoolById, pools, formatUsd } from "@/lib/mock-data"
+import { getPoolDetails } from "@/lib/app-data"
+import { formatUsd } from "@/lib/mock-data"
 import { PageTransition } from "@/components/app/page-transition"
-import { Button } from "@/components/ui/button"
+import { JoinPoolActions } from "@/components/pools/join-pool-actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-export async function generateStaticParams() {
-  return pools.map((pool) => ({ poolId: pool.id }))
-}
 
 export default async function JoinPoolPage({
   params,
@@ -15,11 +12,13 @@ export default async function JoinPoolPage({
   params: Promise<{ poolId: string }>
 }) {
   const { poolId } = await params
-  const pool = getPoolById(poolId)
+  const data = await getPoolDetails(poolId)
 
-  if (!pool) {
+  if (!data) {
     notFound()
   }
+
+  const { pool } = data
 
   return (
     <PageTransition>
@@ -60,10 +59,7 @@ export default async function JoinPoolPage({
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline">Approve</Button>
-            <Button>Join Pool</Button>
-          </div>
+          <JoinPoolActions poolId={pool.id} />
         </CardContent>
       </Card>
     </PageTransition>

@@ -1,6 +1,7 @@
 import { LayoutGridIcon } from "lucide-react"
 
-import { dashboardStats, pools } from "@/lib/mock-data"
+import { getDashboardSnapshot } from "@/lib/app-data"
+import { getAuthSession } from "@/lib/session"
 import { PageTransition } from "@/components/app/page-transition"
 import { PoolCard } from "@/components/pool-card"
 import { StatsCard } from "@/components/stats-card"
@@ -21,7 +22,10 @@ const tabValues = [
   "Non-Earnable Pools",
 ]
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await getAuthSession()
+  const { workspace, stats, pools } = await getDashboardSnapshot(session?.user?.id)
+
   return (
     <PageTransition>
       <section className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -30,25 +34,27 @@ export default function DashboardPage() {
             Dashboard
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            Welcome back, Bashar
+            Welcome back, {workspace?.username ?? "member"}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Your wallet is connected and two pool decisions are waiting this round.
+            OAuth is active, wallet actions run on Sepolia, and the scheduler treats one month as one hour.
           </p>
         </div>
         <Card className="w-full max-w-sm rounded-2xl border border-border/70 bg-background/80 shadow-sm">
           <CardHeader>
             <CardDescription>Quick status</CardDescription>
-            <CardTitle className="text-base">0x72beC71F...B013</CardTitle>
+            <CardTitle className="text-base">{workspace?.wallet ?? "Wallet not linked"}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Connected. Reputation preserved across your active circles.
+            {workspace?.wallet
+              ? "Connected. Reputation and auto-pay rating stay attached to your OAuth workspace."
+              : "Link a primary wallet from /auth before sending onchain transactions."}
           </CardContent>
         </Card>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {dashboardStats.map((stat) => (
+        {stats.map((stat) => (
           <StatsCard
             key={stat.label}
             label={stat.label}
@@ -79,8 +85,8 @@ export default function DashboardPage() {
                   <LayoutGridIcon className="size-4" />
                   {tab}
                 </CardTitle>
-                <CardDescription>
-                  Mock grouping view. Navigation remains available through each card.
+              <CardDescription>
+                  Filtered pool views are seeded from Mongo-backed pool records.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 xl:grid-cols-2">

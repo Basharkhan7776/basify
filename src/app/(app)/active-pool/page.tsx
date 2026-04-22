@@ -1,10 +1,13 @@
-import { getPoolById } from "@/lib/mock-data"
+import { getPoolsData } from "@/lib/app-data"
+import { formatUsd } from "@/lib/mock-data"
 import { PageTransition } from "@/components/app/page-transition"
 import { CountdownTimer } from "@/components/countdown-timer"
 import { StatsCard } from "@/components/stats-card"
 
-export default function ActivePoolPage() {
-  const pool = getPoolById("atlas-growth")
+export default async function ActivePoolPage() {
+  const pools = await getPoolsData()
+  const pool =
+    pools.find((item) => item.status === "Bidding" || item.status === "Active") ?? pools[0]
 
   if (!pool) {
     return null
@@ -24,23 +27,27 @@ export default function ActivePoolPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatsCard
           label="Contribution Due"
-          value="$250"
+          value={formatUsd(pool.contributionAmount)}
           detail="Due before grace period opens"
         />
         <StatsCard
           label="Next Payout Eligibility"
-          value="Eligible"
-          detail="Strong reputation and active status"
+          value={pool.remainingSlots === 0 ? "Eligible" : "Pending"}
+          detail="Based on your linked workspace status"
         />
         <StatsCard
           label="Bid Opportunity"
-          value="Open"
-          detail="Lowest bid currently $62"
+          value={pool.biddingEnabled ? "Open" : "Closed"}
+          detail={
+            pool.biddingEnabled
+              ? `Lowest bid currently ${formatUsd(pool.lowestBid || 0)}`
+              : "This circle settles without bidding"
+          }
         />
         <StatsCard
           label="Round Status"
-          value="Awaiting"
-          detail="Two member payments still pending"
+          value={pool.status}
+          detail={pool.settlementSummary}
         />
       </div>
     </PageTransition>

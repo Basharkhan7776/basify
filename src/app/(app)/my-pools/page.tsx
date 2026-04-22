@@ -1,10 +1,10 @@
-import { pools } from "@/lib/mock-data"
+import { getPoolsData } from "@/lib/app-data"
 import { PageTransition } from "@/components/app/page-transition"
 import { EmptyState } from "@/components/empty-state"
 import { PoolCard } from "@/components/pool-card"
 
-export default function MyPoolsPage() {
-  const joinedPools = pools.slice(0, 3)
+export default async function MyPoolsPage() {
+  const joinedPools = (await getPoolsData()).slice(0, 3)
 
   return (
     <PageTransition>

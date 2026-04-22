@@ -1,5 +1,7 @@
 import { BellIcon, LockIcon, WalletIcon } from "lucide-react"
 
+import { getWorkspace } from "@/lib/app-data"
+import { getAuthSession } from "@/lib/session"
 import { PageTransition } from "@/components/app/page-transition"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +14,10 @@ const sections = [
   { title: "Security", icon: LockIcon, action: "Review Sessions" },
 ]
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const session = await getAuthSession()
+  const workspace = await getWorkspace(session?.user?.id)
+
   return (
     <PageTransition>
       <section>
@@ -39,7 +44,9 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="flex items-center justify-between gap-4">
                 <p className="text-sm text-muted-foreground">
-                  Mock preference controls for {section.title.toLowerCase()} management.
+                  {section.title === "Wallet" && workspace?.wallet
+                    ? `Primary wallet: ${workspace.wallet}`
+                    : `Preference controls for ${section.title.toLowerCase()} management.`}
                 </p>
                 <Switch defaultChecked />
               </CardContent>

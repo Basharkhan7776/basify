@@ -1,6 +1,6 @@
 import { FilterIcon, SearchIcon } from "lucide-react"
 
-import { pools } from "@/lib/mock-data"
+import { getPoolsData } from "@/lib/app-data"
 import { PageTransition } from "@/components/app/page-transition"
 import { PoolCard } from "@/components/pool-card"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +17,9 @@ import {
 
 const filters = ["Bidding", "Non-Bidding", "Enrollment", "Active", "Completed"]
 
-export default function PoolsPage() {
+export default async function PoolsPage() {
+  const pools = await getPoolsData()
+
   return (
     <PageTransition>
       <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

@@ -1,13 +1,7 @@
 import { notFound } from "next/navigation"
 
-import {
-  getPoolById,
-  membersByPool,
-  pools,
-  roundsByPool,
-  transactionsByPool,
-  formatUsd,
-} from "@/lib/mock-data"
+import { getPoolDetails } from "@/lib/app-data"
+import { formatUsd } from "@/lib/mock-data"
 import { PageTransition } from "@/components/app/page-transition"
 import { BidPanel } from "@/components/bid-panel"
 import { CountdownTimer } from "@/components/countdown-timer"
@@ -25,25 +19,19 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export async function generateStaticParams() {
-  return pools.map((pool) => ({ poolId: pool.id }))
-}
-
 export default async function PoolDetailsPage({
   params,
 }: {
   params: Promise<{ poolId: string }>
 }) {
   const { poolId } = await params
-  const pool = getPoolById(poolId)
+  const data = await getPoolDetails(poolId)
 
-  if (!pool) {
+  if (!data) {
     notFound()
   }
 
-  const members = membersByPool[pool.id] ?? []
-  const rounds = roundsByPool[pool.id] ?? []
-  const transactions = transactionsByPool[pool.id] ?? []
+  const { pool, members, rounds, transactions } = data
 
   return (
     <PageTransition>
@@ -98,7 +86,7 @@ export default async function PoolDetailsPage({
             <CardHeader>
               <CardTitle>Contribution progress</CardTitle>
               <CardDescription>
-                Pool completion is modeled from round progress and contribution health.
+                Pool completion is modeled from Mongo round records and scheduler progress.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -168,7 +156,7 @@ export default async function PoolDetailsPage({
             <CardHeader>
               <CardTitle>Current lowest bid</CardTitle>
               <CardDescription>
-                Countdown remains visible while bids are accepted.
+                Countdown is derived from the round window tracked in the app backend.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-between gap-3">
@@ -198,7 +186,7 @@ export default async function PoolDetailsPage({
             <CardHeader>
               <CardTitle>Mediator controls</CardTitle>
               <CardDescription>
-                Mock action surfaces for operational intervention.
+                These controls map to the mediator/operator workflow and scheduled settlement engine.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
